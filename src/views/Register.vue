@@ -100,8 +100,7 @@ export default {
     email: { email, required },
     password: { required, minLength: minLength(6) },
     name: { required },
-    agree: { checked: function(value) { return !!value } },
-    // agree: { checked: v => v },
+    agree: { checked: v => v },
   },
   methods: {
     submitHandler() {

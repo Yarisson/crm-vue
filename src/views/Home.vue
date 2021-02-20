@@ -13,7 +13,7 @@
 
   <div class="row" v-else>
 
-    <HomeBill />
+    <HomeBill :rates="currency.rates" />
     <HomeCurrency />
 
   </div>
@@ -31,6 +31,11 @@ export default {
     loading: true,
     currency: null,
   }),
+  async mounted() {
+    this.currency = await this.$store.dispatch('fetchCurrency')
+    console.log(this.currency)
+    this.loading = false
+  },
   components: { 
     HomeBill,
     HomeCurrency

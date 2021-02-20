@@ -5,6 +5,7 @@ import 'firebase/database';
 import Vue from 'vue';
 import Vuelidate from 'vuelidate';
 import App from './App.vue';
+import Loader from './components/app/Loader';
 import './registerServiceWorker';
 import router from './router';
 import store from './store';
@@ -17,6 +18,7 @@ Vue.config.productionTip = false;
 Vue.use(messagePlugin);
 Vue.filter('date', dateFilter);
 Vue.use(Vuelidate);
+Vue.component('Loader', Loader);
 
   // Your web app's Firebase configuration
   // For Firebase JS SDK v7.20.0 and later, measurementId is optional

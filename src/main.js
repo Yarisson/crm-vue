@@ -12,9 +12,6 @@ import dateFilter from './filters/date.filter';
 import messagePlugin from './utils/message.plugin';
 import 'materialize-css/dist/js/materialize.min';
 
-/* eslint-disable */
-/*eslint no-unused-vars: 1*/
-
 Vue.config.productionTip = false;
 
 Vue.use(messagePlugin);

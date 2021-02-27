@@ -56,5 +56,3 @@ Vue.component('Loader', Loader);
     }
   })
 
-  firebase.analytics();
-

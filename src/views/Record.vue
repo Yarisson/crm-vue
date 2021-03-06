@@ -4,11 +4,17 @@
     <h3>Новая запись</h3>
   </div>
 
-  <form class="form">
+  <Loader v-if="loading" />
+
+  <p class="center" v-else-if="!categories.length">категорий пока нет <router-link to="/categories">создать категорию</router-link></p>
+
+  <form class="form" v-else @submit.prevent="submitHandler">
     <div class="input-field" >
-      <select>
-        <option
-        >name cat</option>
+      <select ref="select" v-model="category">
+        <option v-for="c in categories"
+                :key="c.id"
+                :value="c.id"
+        >{{c.title}}</option>
       </select>
       <label>Выберите категорию</label>
     </div>
@@ -20,6 +26,7 @@
             name="type"
             type="radio"
             value="income"
+            v-model="type"
         />
         <span>Доход</span>
       </label>
@@ -32,6 +39,7 @@
             name="type"
             type="radio"
             value="outcome"
+            v-model="type"
         />
         <span>Расход</span>
       </label>
@@ -41,18 +49,25 @@
       <input
           id="amount"
           type="number"
+          v-model.number="amount"
+          :class="{ invalid: ($v.amount.$dirty && !$v.amount.minValue) }"
       >
       <label for="amount">Сумма</label>
-      <span class="helper-text invalid">amount пароль</span>
+      <span class="helper-text invalid"
+            v-if="$v.amount.$dirty && !$v.amount.minValue">
+        amount пароль
+      </span>
     </div>
 
     <div class="input-field">
       <input
           id="description"
           type="text"
+          v-model="description"
+          :class="{ invalid: ($v.description.$dirty && !$v.description.required) }"
       >
       <label for="description">Описание</label>
-      <span
+      <span v-if="$v.description.$dirty && !$v.description.required"
             class="helper-text invalid">description пароль</span>
     </div>
 
@@ -63,3 +78,88 @@
   </form>
   </div>
 </template>
+
+<script>
+import M from 'materialize-css';
+import { required, minValue } from 'vuelidate/lib/validators';
+import {mapGetters} from 'vuex';
+
+export default {
+  name: 'record',
+  data: () => ({
+    loading: true,
+    select: null,
+    categories: [],
+    category: null,
+    type: 'outcome',
+    amount: 1,
+    description: '',
+  }),
+    validations: {
+    amount: { minValue: minValue(1) },
+    description: { required }
+  },
+  async mounted() {
+    this.categories = await this.$store.dispatch('fetchCategories');
+    this.loading = false;
+    this.select = M.FormSelect.init(this.$refs.select);
+
+    if (this.categories.length) {
+      this.category = this.categories[0].id;
+    }
+
+    setTimeout(() => {
+      this.select = M.FormSelect.init(this.$refs.select);
+      M.updateTextFields();
+    }, 0);
+  },
+  computed: {
+    ...mapGetters(['info']),
+    canCreateRecord() {
+      if (this.type === 'income') {
+        return true
+      }
+
+      return this.info.bill >= this.amount
+    }
+  },
+  methods: {
+    async submitHandler() {
+      if (this.$v.$invalid) {
+        this.$v.$touch()
+        return
+      }
+
+      if (this.canCreateRecord) {
+        try {
+          await this.$store.dispatch('createRecord', {
+            categoryId: this.category,
+            amount: this.amount,
+            description: this.description,
+            type: this.type,
+            date: new Date().toJSON(),
+          });
+          const bill = this.type === 'income'
+            ? this.info.bill + this.amount
+            : this.info.bill - this.amount;
+
+          await this.$store.dispatch('updateInfo', {bill});
+          this.$message('запись успешно создана');
+          this.$v.reset();
+          this.amount = 1;
+          this.description = '';
+        } catch (e) {
+
+        }
+      } else {
+        this.$message(`недостаточно средств на счете (${this.amount - this.info.bill})`);
+      }
+    }
+  },
+  destroyed() {
+    if (this.select && this.select.destroy) {
+      this.select.destroy();
+    }
+  },
+}
+</script>

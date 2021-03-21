@@ -4,6 +4,7 @@ import 'firebase/database';
 
 import Vue from 'vue';
 import Vuelidate from 'vuelidate';
+import Paginate from 'vuejs-paginate';
 import App from './App.vue';
 import Loader from './components/app/Loader';
 import './registerServiceWorker';
@@ -23,6 +24,7 @@ Vue.filter('currency', currencyFilter);
 Vue.directive('tooltip', tooltipDirective);
 Vue.use(Vuelidate);
 Vue.component('Loader', Loader);
+Vue.component('Paginate', Paginate);
 
   // Your web app's Firebase configuration
   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
